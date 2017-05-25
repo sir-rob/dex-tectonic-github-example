@@ -1,0 +1,18 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: GitHubViewers
+# subjects holds references to the objects the role applies to.
+subjects:
+  # May be "User", "Group" or "ServiceAccount".
+  - kind: Group
+    # Preexisting user's email
+    name: SEViewers
+# roleRef contains information about the role being used.
+# It can only reference a ClusterRole in the global namespace.
+roleRef:
+  kind: ClusterRole
+  # name of an existing ClusterRole, either "view", "user", "admin",
+  # or a custom defined role.
+  name: view
+  apiGroup: rbac.authorization.k8s.io
