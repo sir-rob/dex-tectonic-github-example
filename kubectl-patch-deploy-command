@@ -1,0 +1,1 @@
+kubectl patch deployment tectonic-identity     --patch "{\"spec\":{\"template\":{\"metadata\":{\"annotations\":{\"date\":\"`date +'%s'`\"}}}}}"     --namespace tectonic-system
