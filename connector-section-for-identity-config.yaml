@@ -1,0 +1,16 @@
+connectors:
+    - type: github
+      # Required field for connector id.
+      id: github
+      # Required field for connector name.
+      name: GitHub
+      config:
+        # Credentials can be string literals or pulled from the environment.
+        clientID: 4d52f34d37854d164f05
+        clientSecret: 5c8dc71eff86296123424d505c3420bc98d596f7
+        redirectURI: https://Saurabh1552Tst.aws.event-cloud.net/identity/callback
+        # Optional organization to pull teams from, communicate through the
+        # "groups" scope.
+        #
+        # NOTE: This is an EXPERIMENTAL config option and will likely change.
+        org: Solutions-Engineers
