@@ -1,0 +1,157 @@
+# Create a new Cluster Role Binding called GitHubAdmins that binds the admin ClusterRole to the SEAdmins github team
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: GitHubAdmins
+# subjects holds references to the objects the role applies to.
+subjects:
+  # May be "User", "Group" or "ServiceAccount".
+  - kind: Group
+    # Preexisting github team within your org
+    name: SEAdmins
+# roleRef contains information about the role being used.
+# It can only reference a ClusterRole in the global namespace.
+roleRef:
+  kind: ClusterRole
+  # name of an existing ClusterRole, either "readonly", "user", "admin",
+  # or a custom defined role.
+  name: admin
+  apiGroup: rbac.authorization.k8s.io
+---
+# Create a new Cluster Role Binding called GitHubViewers that binds the view ClusterRole to the SEViewers github team
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: GitHubViewers
+# subjects holds references to the objects the role applies to.
+subjects:
+  # May be "User", "Group" or "ServiceAccount".
+  - kind: Group
+    # Preexisting user's email
+    name: SEViewers
+# roleRef contains information about the role being used.
+# It can only reference a ClusterRole in the global namespace.
+roleRef:
+  kind: ClusterRole
+  # name of an existing ClusterRole, either "view", "user", "admin",
+  # or a custom defined role.
+  name: view
+  apiGroup: rbac.authorization.k8s.io
+---
+# Create a new namespace called nsteam01
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: nsteam01
+---
+# Create a new namespace called nsteam02
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: nsteam02
+---
+# Create a new Role called nsteam01-all-role, with full access to app apiGroups and all resources inside of Namespace nsteam01
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: nsteam01
+  name: nsteam01-all-role
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+# Create a new RoleBinding called nsteam01-all-rolebinding that binds the Role nsteam01-all-role to Github group nsteam01
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: nsteam01-all-rolebinding
+  namespace: nsteam01
+subjects:
+  - kind: Group
+    # this needs to match your GitHub group name
+    name: NSTeam01
+roleRef:
+  kind: Role
+  name: nsteam01-all-role
+  apiGroup: "rbac.authorization.k8s.io"
+---
+# Create a new Role called nsteam02-all-role, with full access to app apiGroups and all resources inside of Namespace nsteam02
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: nsteam02
+  name: nsteam02-all-role
+rules:
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+---
+# Create a new RoleBinding called nsteam02-all-rolebinding that binds the Role nsteam02-all-role to Github group nsteam02
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: nsteam02-all-rolebinding
+  namespace: nsteam02
+subjects:
+  - kind: Group
+    # this needs to match your GitHub group name
+    name: NSTeam02
+roleRef:
+  kind: Role
+  name: nsteam02-all-role
+  apiGroup: "rbac.authorization.k8s.io"
+---
+# Create a new ClusterRole called list-ns-all, that only has access to list namespaces
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: list-ns-all
+rules:
+  - apiGroups:
+    - ""
+    # attributeRestrictions: null
+    resources:
+    - namespaces/status
+    verbs:
+    - get
+    - list
+    - watch
+  - apiGroups:
+    - ""
+    # attributeRestrictions: null
+    resources:
+    - namespaces
+    verbs:
+    - get
+    - list
+    - watch
+---
+# Create a new ClusterRoleBinding called cluster-role-list-ns-all-members, that binds the role list-ns-all to authenticated users
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: cluster-role-list-ns-all-members
+subjects:
+  - kind: Group
+    name: system:authenticated
+roleRef:
+  kind: ClusterRole
+  name: list-ns-all
+  apiGroup: "rbac.authorization.k8s.io"
+---
+# Create a new ClusterRoleBinding called cluster-role-all-discover-api That will use the system:discovery ClusterRole and bind all users (authenticated and unauthenticated) to it, allowing them to access 
+# swagger and API group information.
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: cluster-role-all-discover-api
+subjects:
+  - kind: Group
+    name: system:authenticated
+  - kind: Group
+    name: system:unauthenticated
+roleRef:
+  kind: ClusterRole
+  name: system:discovery
+  apiGroup: "rbac.authorization.k8s.io"
